@@ -22,7 +22,7 @@ trait Synchronizable
     public static function bootSynchronizable()
     {
         static::created(function ($synchronizable) {
-            if (config('googlecalendar.sync_on_created')) {
+            if (config('googlecalendar.sync_on_create')) {
                 $synchronizable->synchronization()->create();
             }
         });

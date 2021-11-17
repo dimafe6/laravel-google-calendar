@@ -3,6 +3,7 @@
 namespace Dimafe6\GoogleCalendar\Models;
 
 use Dimafe6\GoogleCalendar\Concerns\Synchronizable;
+use Dimafe6\GoogleCalendar\Contracts\SynchronizableInterface;
 use Dimafe6\GoogleCalendar\Jobs\SynchronizeGoogleEvents;
 use Google\Collection;
 use Illuminate\Database\Eloquent\Model;
@@ -24,7 +25,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  * @property GoogleAccount $googleAccount
  * @property Collection $events
  */
-class GoogleCalendar extends Model
+class GoogleCalendar extends Model implements SynchronizableInterface
 {
     use Synchronizable;
 

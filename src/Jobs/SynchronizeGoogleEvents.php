@@ -43,14 +43,14 @@ class SynchronizeGoogleEvents extends SynchronizeGoogleResource implements Shoul
         // Default configuration. This is available only if syncToken is not provided
         if (!isset($options['syncToken'])) {
             $defaultOptions = [
-                'maxResults' => config('googlecalendar.events.max_results_per_page'),
+                'maxResults' => config('googlecalendar.max_results_per_page'),
             ];
 
-            if ($timeMin = config('googlecalendar.events.time_min_months')) {
+            if ($timeMin = config('googlecalendar.time_min_months')) {
                 $defaultOptions['timeMin'] = now()->subMonths($timeMin)->format(DateTimeInterface::RFC3339);
             }
 
-            if ($timeMax = config('googlecalendar.events.time_max_months')) {
+            if ($timeMax = config('googlecalendar.time_max_months')) {
                 $defaultOptions['timeMax'] = now()->addMonths($timeMax)->format(DateTimeInterface::RFC3339);
             }
 
