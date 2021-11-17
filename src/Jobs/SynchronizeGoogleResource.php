@@ -2,15 +2,29 @@
 
 namespace Dimafe6\GoogleCalendar\Jobs;
 
+use Dimafe6\GoogleCalendar\Contracts\SynchronizableInterface;
+use Dimafe6\GoogleCalendar\Contracts\SynchronizationInterface;
+use Google_Service_Calendar;
 use Google_Service_Exception;
 
+/**
+ * Class SynchronizeGoogleResource
+ *
+ * @category PHP
+ * @package  Dimafe6\GoogleCalendar\Jobs
+ * @author   Dmytro Feshchenko <dimafe2000@gmail.com>
+ */
 abstract class SynchronizeGoogleResource
 {
-    protected $synchronizable;
-    protected $synchronization;
+    protected SynchronizableInterface $synchronizable;
+    protected SynchronizationInterface $synchronization;
     protected bool $force = false;
 
-    public function __construct($synchronizable, bool $force = false)
+    /**
+     * @param SynchronizableInterface $synchronizable
+     * @param bool $force Clear all items and resync
+     */
+    public function __construct(SynchronizableInterface $synchronizable, bool $force = false)
     {
         $this->synchronizable = $synchronizable;
         $this->synchronization = $synchronizable->synchronization;
@@ -18,7 +32,10 @@ abstract class SynchronizeGoogleResource
     }
 
     /**
+     * Implements logic for getting resources with pagination
+     *
      * @throws Google_Service_Exception
+     * @author Dmytro Feshchenko <dimafe2000@gmail.com>
      */
     public function handle()
     {
@@ -67,12 +84,39 @@ abstract class SynchronizeGoogleResource
         ]);
     }
 
-    abstract public function getGoogleService();
+    /**
+     * Returns google service by the provided access token
+     *
+     * @return Google_Service_Calendar
+     * @author Dmytro Feshchenko <dimafe2000@gmail.com>
+     */
+    abstract public function getGoogleService(): Google_Service_Calendar;
 
-    abstract public function getGoogleRequest($service, $options);
+    /**
+     * Returns a google API request for getting items for synchronization
+     *
+     * @param Google_Service_Calendar $service
+     * @param array $options
+     * @return mixed
+     * @author Dmytro Feshchenko <dimafe2000@gmail.com>
+     */
+    abstract public function getGoogleRequest(Google_Service_Calendar $service, array $options);
 
-    abstract public function syncItems(array $items);
+    /**
+     * Logic for syncing items
+     *
+     * @param array $items
+     * @return void
+     * @author Dmytro Feshchenko <dimafe2000@gmail.com>
+     */
+    abstract public function syncItems(array $items): void;
 
-    abstract public function dropAllSyncedItems();
+    /**
+     * Logic for clear all synced items
+     *
+     * @return void
+     * @author Dmytro Feshchenko <dimafe2000@gmail.com>
+     */
+    abstract public function dropAllSyncedItems(): void;
 }
 

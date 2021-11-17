@@ -21,12 +21,12 @@ use Throwable;
 class GoogleService
 {
     /**
-     * @param string $accessToken
+     * @param ?string $accessToken
      * @return ?Google_Client
      * @throws Throwable
      * @author Dmytro Feshchenko <dimafe2000@gmail.com>
      */
-    public static function getGoogleClient($accessToken): ?Google_Client
+    public static function getGoogleClient(?string $accessToken): ?Google_Client
     {
         if (!$accessToken) {
             return null;
@@ -90,49 +90,6 @@ class GoogleService
         }
 
         return null;
-    }
-
-    /**
-     * @param ?string $accessToken
-     * @param array $calendarIds
-     * @param array $params
-     * @return Event[]
-     * @throws Throwable
-     * @author Dmytro Feshchenko <dimafe2000@gmail.com>
-     */
-    public static function getCalendarsEvents(?string $accessToken, array $calendarIds, array $params = []): array
-    {
-        $events = [];
-        $params = array_merge([], $params);
-
-        if ($calendarService = self::getGoogleCalendarService($accessToken)) {
-            foreach ($calendarIds as $calendarId) {
-                $nextPageToken = null;
-                do {
-                    if ($nextPageToken) {
-                        $params = array_merge($params, ['pageToken' => $nextPageToken]);
-                        sleep(1); // Simple throttling
-                    }
-
-                    $listEventsResult = $calendarService->events->listEvents($calendarId, $params);
-                    $newItems = $listEventsResult->getItems();
-
-                    if (count($newItems)) {
-                        $newItems = collect($newItems)->each(function (Event $e) use ($calendarId) {
-                            $e->calendarId = $calendarId;
-                        })
-                            ->toArray();
-                    }
-
-                    $events = array_merge($events, $newItems);
-
-                } while ($nextPageToken = $listEventsResult->getNextPageToken());
-            }
-
-            return $events;
-        }
-
-        return [];
     }
 
     /**
@@ -219,10 +176,4 @@ class GoogleService
 
         return null;
     }
-
-
-
-
-
-
 }

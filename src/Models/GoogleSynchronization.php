@@ -2,11 +2,23 @@
 
 namespace Dimafe6\GoogleCalendar\Models;
 
+use Carbon\Carbon;
+use Dimafe6\GoogleCalendar\Contracts\SynchronizationInterface;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Support\Facades\DB;
+use Illuminate\Database\Eloquent\Relations\MorphTo;
 use Ramsey\Uuid\Uuid;
 
-class GoogleSynchronization extends Model
+/**
+ * Class GoogleSynchronization
+ *
+ * @category PHP
+ * @package  Dimafe6\GoogleCalendar\Models
+ * @author   Dmytro Feshchenko <dimafe2000@gmail.com>
+ * @property integer $id
+ * @property string $token
+ * @property Carbon $last_synchronized_at
+ */
+class GoogleSynchronization extends Model implements SynchronizationInterface
 {
     public const TABLE = 'google_synchronizations';
 
@@ -21,30 +33,34 @@ class GoogleSynchronization extends Model
         'last_synchronized_at'
     ];
 
-    protected $casts = [
-        'last_synchronized_at' => 'datetime',
-    ];
+    protected $dates = ['last_synchronized_at'];
 
-    // Ask the synchronizable to dispatch the relevant job.
-    public function ping()
+    /**
+     * @inheritDoc
+     */
+    public function ping(): void
     {
-        return $this->synchronizable->synchronize();
+        $this->synchronizable->synchronize();
     }
 
-    // Create a polymorphic relationship to Google accounts and Calendars.
-    public function synchronizable()
+    /**
+     * @inheritDoc
+     */
+    public function synchronizable(): MorphTo
     {
         return $this->morphTo();
     }
 
-    // Add global model listeners
+    /**
+     * @inheritDoc
+     */
     public static function boot()
     {
         parent::boot();
 
         // Before creating a new synchronization,
         // ensure the UUID and the `last_synchronized_at` are set.
-        static::creating(function ($synchronization) {
+        static::creating(function (GoogleSynchronization $synchronization) {
             $synchronization->id = Uuid::uuid4();
             $synchronization->last_synchronized_at = now();
         });

@@ -16,7 +16,9 @@
         "laravel/socialite": "^5.2",
         "google/apiclient": "^2.0",
         "ramsey/uuid": "^4.2",
-        "socialiteproviders/google": "^4.1"
+        "socialiteproviders/google": "^4.1",
+        "rlanvin/php-rrule": "^2.3",
+      "ext-json": "*"
     },
     "require-dev": {
         "phpunit/phpunit": "~9.0",

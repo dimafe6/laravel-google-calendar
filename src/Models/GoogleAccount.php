@@ -4,16 +4,18 @@ namespace Dimafe6\GoogleCalendar\Models;
 
 use App\Models\User;
 use Carbon\Carbon;
+use Dimafe6\GoogleCalendar\Concerns\Synchronizable;
+use Dimafe6\GoogleCalendar\Contracts\SynchronizableInterface;
+use Dimafe6\GoogleCalendar\Facades\GoogleCalendar as CalendarFacade;
 use Dimafe6\GoogleCalendar\Jobs\SynchronizeGoogleCalendars;
 use Dimafe6\GoogleCalendar\Models\GoogleCalendar as GoogleCalendarModel;
-use Dimafe6\GoogleCalendar\Models\Traits\Synchronizable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Log;
 use Laravel\Socialite\Facades\Socialite;
 use Throwable;
-use Dimafe6\GoogleCalendar\Facades\GoogleCalendar as CalendarFacade;
 
 /**
  * Class GoogleAccount
@@ -32,8 +34,10 @@ use Dimafe6\GoogleCalendar\Facades\GoogleCalendar as CalendarFacade;
  * @property string $access_token
  * @property Carbon $access_token_expire
  * @property string $refresh_token
+ * @property Collection $calendars
+ * @property User $user
  */
-class GoogleAccount extends Model
+class GoogleAccount extends Model implements SynchronizableInterface
 {
     use Synchronizable;
 
@@ -58,7 +62,10 @@ class GoogleAccount extends Model
 
     public $dates = ['access_token_expire'];
 
-    public function synchronize(bool $force = false)
+    /**
+     * @inheritDoc
+     */
+    public function synchronize(bool $force = false): void
     {
         SynchronizeGoogleCalendars::dispatch($this, $force);
     }
@@ -67,7 +74,7 @@ class GoogleAccount extends Model
      * @return BelongsTo
      * @author Dmytro Feshchenko <dimafe2000@gmail.com>
      */
-    public function user()
+    public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
     }
@@ -76,16 +83,18 @@ class GoogleAccount extends Model
      * @return HasMany
      * @author Dmytro Feshchenko <dimafe2000@gmail.com>
      */
-    public function calendars()
+    public function calendars(): HasMany
     {
         return $this->hasMany(GoogleCalendarModel::class);
     }
 
     /**
-     * @return string|void
+     * Returns google account access token. The access token will be refreshed if it is expired
+     *
+     * @return ?string
      * @author Dmytro Feshchenko <dimafe2000@gmail.com>
      */
-    public function getAccessTokenAttribute()
+    public function getAccessTokenAttribute(): ?string
     {
         try {
             // Automatically update access token if it expired
@@ -119,6 +128,8 @@ class GoogleAccount extends Model
             return $this->attributes['access_token'];
         } catch (Throwable $exception) {
             Log::error($exception->getMessage());
+
+            return null;
         }
     }
 }

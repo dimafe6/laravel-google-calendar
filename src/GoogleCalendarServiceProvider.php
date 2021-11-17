@@ -5,6 +5,13 @@ namespace Dimafe6\GoogleCalendar;
 use Dimafe6\GoogleCalendar\Services\GoogleService;
 use Illuminate\Support\ServiceProvider;
 
+/**
+ * Class GoogleCalendarServiceProvider
+ *
+ * @category PHP
+ * @package  Dimafe6\GoogleCalendar
+ * @author   Dmytro Feshchenko <dimafe2000@gmail.com>
+ */
 class GoogleCalendarServiceProvider extends ServiceProvider
 {
     /**
@@ -14,10 +21,8 @@ class GoogleCalendarServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        // $this->loadTranslationsFrom(__DIR__.'/../resources/lang', 'dimafe6');
-        // $this->loadViewsFrom(__DIR__.'/../resources/views', 'dimafe6');
-         $this->loadMigrationsFrom(__DIR__.'/../database/migrations');
-        // $this->loadRoutesFrom(__DIR__.'/routes.php');
+        $this->loadMigrationsFrom(__DIR__ . '/../database/migrations');
+        $this->loadRoutesFrom(__DIR__.'/../routes/routes.php');
 
         // Publishing is only necessary when using the CLI.
         if ($this->app->runningInConsole()) {
@@ -32,7 +37,7 @@ class GoogleCalendarServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        $this->mergeConfigFrom(__DIR__.'/../config/googlecalendar.php', 'googlecalendar');
+        $this->mergeConfigFrom(__DIR__ . '/../config/googlecalendar.php', 'googlecalendar');
 
         // Register the service the package provides.
         $this->app->singleton('googlecalendar', function ($app) {
@@ -59,23 +64,8 @@ class GoogleCalendarServiceProvider extends ServiceProvider
     {
         // Publishing the configuration file.
         $this->publishes([
-            __DIR__.'/../config/googlecalendar.php' => config_path('googlecalendar.php'),
+            __DIR__ . '/../config/googlecalendar.php' => config_path('googlecalendar.php'),
         ], 'googlecalendar.config');
-
-        // Publishing the views.
-        /*$this->publishes([
-            __DIR__.'/../resources/views' => base_path('resources/views/vendor/dimafe6'),
-        ], 'googlecalendar.views');*/
-
-        // Publishing assets.
-        /*$this->publishes([
-            __DIR__.'/../resources/assets' => public_path('vendor/dimafe6'),
-        ], 'googlecalendar.views');*/
-
-        // Publishing the translation files.
-        /*$this->publishes([
-            __DIR__.'/../resources/lang' => resource_path('lang/vendor/dimafe6'),
-        ], 'googlecalendar.views');*/
 
         // Registering package commands.
         // $this->commands([]);

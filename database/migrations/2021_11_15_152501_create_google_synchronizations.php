@@ -15,9 +15,9 @@ class CreateGoogleSynchronizations extends Migration
     {
         Schema::create('google_synchronizations', function (Blueprint $table) {
             $table->string('id');
-            $table->morphs('synchronizable');
-            $table->string('token')->nullable();
-            $table->datetime('last_synchronized_at');
+            $table->morphs('synchronizable'); // Reference to the model which will be synchronized
+            $table->string('token')->nullable()->comment('syncToken provided by the google calendar API');
+            $table->datetime('last_synchronized_at')->comment('Date of the last synchronization');
         });
     }
 

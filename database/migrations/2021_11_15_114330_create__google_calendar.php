@@ -15,11 +15,11 @@ class CreateGoogleCalendar extends Migration
     {
         Schema::create('google_calendars', function (Blueprint $table) {
             $table->id();
-            $table->string('google_id')->unique();
-            $table->integer('google_account_id');
-            $table->text('name');
-            $table->string('color')->nullable();
-            $table->string('timezone');
+            $table->string('google_id')->unique()->comment('Google calendar identifier');
+            $table->integer('google_account_id')->comment('Reference to the google_accounts table');
+            $table->text('name')->comment('Calendar name');
+            $table->string('color')->nullable()->comment('Calendar color');
+            $table->string('timezone')->comment('Calendar timezone');
 
             $table->foreign('google_account_id')
                 ->references('id')->on('google_accounts')

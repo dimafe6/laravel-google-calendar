@@ -23,8 +23,8 @@ class GoogleCalendarEvent extends Migration
             $table->string('html_link')->nullable();
             $table->string('hangout_link')->nullable();
             $table->string('organizer_email')->nullable();
-            $table->dateTimeTz('date_start');
-            $table->dateTimeTz('date_end');
+            $table->timestamp('date_start');
+            $table->timestamp('date_end');
             $table->integer('duration');
             $table->boolean('all_day')->default(false);
             $table->text('recurrence')->nullable();

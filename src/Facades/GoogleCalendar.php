@@ -4,6 +4,13 @@ namespace Dimafe6\GoogleCalendar\Facades;
 
 use Illuminate\Support\Facades\Facade;
 
+/**
+ * Class GoogleCalendar
+ *
+ * @category PHP
+ * @package  Dimafe6\GoogleCalendar\Facades
+ * @author   Dmytro Feshchenko <dimafe2000@gmail.com>
+ */
 class GoogleCalendar extends Facade
 {
     /**

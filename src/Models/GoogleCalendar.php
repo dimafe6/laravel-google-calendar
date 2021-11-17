@@ -2,8 +2,9 @@
 
 namespace Dimafe6\GoogleCalendar\Models;
 
+use Dimafe6\GoogleCalendar\Concerns\Synchronizable;
 use Dimafe6\GoogleCalendar\Jobs\SynchronizeGoogleEvents;
-use Dimafe6\GoogleCalendar\Models\Traits\Synchronizable;
+use Google\Collection;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -20,6 +21,8 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  * @property string $name
  * @property string $color
  * @property string $timezone
+ * @property GoogleAccount $googleAccount
+ * @property Collection $events
  */
 class GoogleCalendar extends Model
 {
@@ -40,7 +43,10 @@ class GoogleCalendar extends Model
         'timezone',
     ];
 
-    public function synchronize(bool $force = false)
+    /**
+     * @inheritDoc
+     */
+    public function synchronize(bool $force = false): void
     {
         SynchronizeGoogleEvents::dispatch($this, $force);
     }
@@ -49,7 +55,7 @@ class GoogleCalendar extends Model
      * @return BelongsTo
      * @author Dmytro Feshchenko <dimafe2000@gmail.com>
      */
-    public function googleAccount()
+    public function googleAccount(): BelongsTo
     {
         return $this->belongsTo(GoogleAccount::class);
     }
@@ -58,7 +64,7 @@ class GoogleCalendar extends Model
      * @return HasMany
      * @author Dmytro Feshchenko <dimafe2000@gmail.com>
      */
-    public function events()
+    public function events(): HasMany
     {
         return $this->hasMany(GoogleCalendarEvent::class);
     }

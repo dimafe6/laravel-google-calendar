@@ -6,6 +6,7 @@ use Carbon\Carbon;
 use DateTimeInterface;
 use Dimafe6\GoogleCalendar\Facades\GoogleCalendar;
 use Google\Service\Calendar\Event;
+use Google\Service\Calendar\EventDateTime;
 use Google\Service\Calendar\Events;
 use Google_Service_Calendar;
 use Illuminate\Bus\Queueable;
@@ -15,13 +16,19 @@ use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
 use Throwable;
 
+/**
+ * Class SynchronizeGoogleEvents
+ *
+ * @category PHP
+ * @package  Dimafe6\GoogleCalendar\Jobs
+ * @author   Dmytro Feshchenko <dimafe2000@gmail.com>
+ */
 class SynchronizeGoogleEvents extends SynchronizeGoogleResource implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
     /**
-     * @return Google_Service_Calendar
-     * @author Dmytro Feshchenko <dimafe2000@gmail.com>
+     * @inheritDoc
      */
     public function getGoogleService(): Google_Service_Calendar
     {
@@ -29,13 +36,11 @@ class SynchronizeGoogleEvents extends SynchronizeGoogleResource implements Shoul
     }
 
     /**
-     * @param Google_Service_Calendar $service
-     * @param $options
-     * @return Events
-     * @author Dmytro Feshchenko <dimafe2000@gmail.com>
+     * @inheritDoc
      */
-    public function getGoogleRequest($service, $options): Events
+    public function getGoogleRequest(Google_Service_Calendar $service, array $options): Events
     {
+        // Default configuration. This is available only if syncToken is not provided
         if (!isset($options['syncToken'])) {
             $defaultOptions = [
                 'maxResults' => config('googlecalendar.events.max_results_per_page'),
@@ -63,10 +68,11 @@ class SynchronizeGoogleEvents extends SynchronizeGoogleResource implements Shoul
      * @throws Throwable
      * @author Dmytro Feshchenko <dimafe2000@gmail.com>
      */
-    public function syncItems(array $googleEvents)
+    public function syncItems(array $googleEvents): void
     {
         $googleEvents = collect($googleEvents);
 
+        // Delete all local events that deleted on the google
         $deletedEventsIDs = $googleEvents->where('status', '=', 'cancelled')->pluck('id')->toArray();
         if (count($deletedEventsIDs)) {
             $this->synchronizable->events()
@@ -75,8 +81,10 @@ class SynchronizeGoogleEvents extends SynchronizeGoogleResource implements Shoul
         }
 
         $existsEvents = [];
+        // Getting all changed google events
         $changedEvents = $googleEvents->whereNotIn('id', $deletedEventsIDs);
         if ($changedEvents->count()) {
+            // Getting all events that exist in our database and not changed from the google
             $existsEvents = $this->synchronizable
                 ->events()
                 ->whereIn('google_id', $changedEvents->pluck('id')->toArray())
@@ -99,36 +107,60 @@ class SynchronizeGoogleEvents extends SynchronizeGoogleResource implements Shoul
                 'date_end'           => $this->parseDatetime($event->end),
                 'all_day'            => $this->isAllDayEvent($event),
                 'duration'           => $this->getDuration($event),
-                'recurrence'         => $event->recurrence ? json_encode($event->recurrence) : null
+                'recurrence'         => $event->recurrence ? $event->recurrence[0] ?? null : null
             ];
 
+            // If current event is exists in our DB then update this event
             if (count($existsEvents) && in_array($event->id, $existsEvents)) {
                 $this->synchronizable->events()->where('google_id', $event->id)->update($data);
             } else {
+                // If current event is don't exists in our DB then create this event
                 $this->synchronizable->events()->create($data);
             }
         }
     }
 
-    protected function isAllDayEvent($googleEvent)
+    /**
+     * Returns true if current event is "all day" event
+     *
+     * @param Event $googleEvent
+     * @return bool
+     * @author Dmytro Feshchenko <dimafe2000@gmail.com>
+     */
+    protected function isAllDayEvent(Event $googleEvent): bool
     {
         return !is_null($googleEvent->getStart()->date);
     }
 
-    protected function parseDatetime($googleDatetime)
+    /**
+     * Returns UTC time for provided event
+     *
+     * @param EventDateTime $googleDatetime
+     * @return Carbon
+     * @author Dmytro Feshchenko <dimafe2000@gmail.com>
+     */
+    protected function parseDatetime(EventDateTime $googleDatetime): Carbon
     {
-        return Carbon::parse(
-            $googleDatetime->dateTime ?? $googleDatetime->date,
-            $googleDatetime->timeZone
-        );
+        return Carbon::parse($googleDatetime->dateTime ?? $googleDatetime->date)->utc();
     }
 
-    protected function getDuration($googleEvent)
+    /**
+     * Returns event duration in minutes
+     *
+     * @param Event $googleEvent
+     * @return int
+     * @author Dmytro Feshchenko <dimafe2000@gmail.com>
+     */
+    protected function getDuration(Event $googleEvent): int
     {
-        return $this->parseDatetime($googleEvent->end)->diffInMinutes($this->parseDatetime($googleEvent->start));
+        return $this->parseDatetime($googleEvent->getEnd())
+            ->diffInMinutes($this->parseDatetime($googleEvent->getStart()));
     }
 
-    public function dropAllSyncedItems()
+    /**
+     * @inheritDoc
+     */
+    public function dropAllSyncedItems(): void
     {
         $this->synchronizable->events()->delete();
     }

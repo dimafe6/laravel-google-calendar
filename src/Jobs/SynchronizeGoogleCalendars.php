@@ -3,7 +3,6 @@
 namespace Dimafe6\GoogleCalendar\Jobs;
 
 use Dimafe6\GoogleCalendar\Facades\GoogleCalendar;
-use Dimafe6\GoogleCalendar\Models\GoogleAccount;
 use Google\Service\Calendar\CalendarList;
 use Google\Service\Calendar\CalendarList as CalendarListModel;
 use Google\Service\Calendar\CalendarListEntry;
@@ -16,13 +15,19 @@ use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Facades\DB;
 use Throwable;
 
+/**
+ * Class SynchronizeGoogleCalendars
+ *
+ * @category PHP
+ * @package  Dimafe6\GoogleCalendar\Jobs
+ * @author   Dmytro Feshchenko <dimafe2000@gmail.com>
+ */
 class SynchronizeGoogleCalendars extends SynchronizeGoogleResource implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
     /**
-     * @return Google_Service_Calendar
-     * @author Dmytro Feshchenko <dimafe2000@gmail.com>
+     * @inheritDoc
      */
     public function getGoogleService(): Google_Service_Calendar
     {
@@ -30,12 +35,9 @@ class SynchronizeGoogleCalendars extends SynchronizeGoogleResource implements Sh
     }
 
     /**
-     * @param Google_Service_Calendar $service
-     * @param $options
-     * @return CalendarListModel
-     * @author Dmytro Feshchenko <dimafe2000@gmail.com>
+     * @inheritDoc
      */
-    public function getGoogleRequest($service, $options): CalendarListModel
+    public function getGoogleRequest(Google_Service_Calendar $service, array $options): CalendarListModel
     {
         return $service->calendarList->listCalendarList($options);
     }
@@ -45,10 +47,11 @@ class SynchronizeGoogleCalendars extends SynchronizeGoogleResource implements Sh
      * @throws Throwable
      * @author Dmytro Feshchenko <dimafe2000@gmail.com>
      */
-    public function syncItems(array $googleCalendars)
+    public function syncItems(array $googleCalendars): void
     {
         $calendars = collect($googleCalendars);
 
+        // Delete all local calendars that deleted on the google
         $deletedCalendarsIDs = $calendars->where('deleted', '=', true)->pluck('id')->toArray();
         if (count($deletedCalendarsIDs)) {
             $this->synchronizable->calendars()
@@ -56,11 +59,13 @@ class SynchronizeGoogleCalendars extends SynchronizeGoogleResource implements Sh
                 ->delete();
         }
 
+        // Get all not deleted google calendars
         $newCalendars = $calendars->whereNotIn('id', $deletedCalendarsIDs);
 
         try {
             DB::beginTransaction();
 
+            // Create or update all google calendars on our database
             foreach ($newCalendars as $googleCalendar) {
                 $this->synchronizable->calendars()->updateOrCreate(
                     [
@@ -82,7 +87,10 @@ class SynchronizeGoogleCalendars extends SynchronizeGoogleResource implements Sh
         }
     }
 
-    public function dropAllSyncedItems()
+    /**
+     * @inheritDoc
+     */
+    public function dropAllSyncedItems(): void
     {
         $this->synchronizable->calendars()->delete();
     }
