@@ -77,13 +77,13 @@ class GoogleService
     }
 
     /**
-     * @param string $accessToken
+     * @param ?string $accessToken
      * @param string $calendarId
      * @return ?Calendar
      * @throws Throwable
      * @author Dmytro Feshchenko <dimafe2000@gmail.com>
      */
-    public static function getCalendarById(string $accessToken, string $calendarId): ?Calendar
+    public static function getCalendarById(?string $accessToken, string $calendarId): ?Calendar
     {
         if ($calendarService = self::getGoogleCalendarService($accessToken)) {
             return $calendarService->calendars->get($calendarId);
@@ -93,14 +93,14 @@ class GoogleService
     }
 
     /**
-     * @param string $accessToken
+     * @param ?string $accessToken
      * @param string $calendarId
      * @param string $eventId
      * @return Event|null
      * @throws Throwable
      * @author Dmytro Feshchenko <dimafe2000@gmail.com>
      */
-    public static function getEvent(string $accessToken, string $calendarId, string $eventId): ?Event
+    public static function getEvent(?string $accessToken, string $calendarId, string $eventId): ?Event
     {
         if ($calendarService = self::getGoogleCalendarService($accessToken)) {
             return $calendarService->events->get($calendarId, $eventId);
@@ -110,13 +110,13 @@ class GoogleService
     }
 
     /**
-     * @param string $accessToken
+     * @param ?string $accessToken
      * @param string $summary
      * @return Calendar|null
      * @throws Throwable
      * @author Dmytro Feshchenko <dimafe2000@gmail.com>
      */
-    public static function createCalendarBySummary(string $accessToken, string $summary): ?Calendar
+    public static function createCalendarBySummary(?string $accessToken, string $summary): ?Calendar
     {
         if ($calendarService = self::getGoogleCalendarService($accessToken)) {
             $calendar = new Google_Service_Calendar_Calendar();
@@ -129,14 +129,14 @@ class GoogleService
     }
 
     /**
-     * @param string $accessToken
+     * @param ?string $accessToken
      * @param string $calendarId
      * @param Google_Service_Calendar_Event $event
      * @return Event|null
      * @throws Throwable
      * @author Dmytro Feshchenko <dimafe2000@gmail.com>
      */
-    public static function createEvent(string $accessToken, string $calendarId, Google_Service_Calendar_Event $event): ?Event
+    public static function createEvent(?string $accessToken, string $calendarId, Google_Service_Calendar_Event $event): ?Event
     {
         if ($calendarService = self::getGoogleCalendarService($accessToken)) {
             return $calendarService->events->insert($calendarId, $event);
@@ -146,13 +146,13 @@ class GoogleService
     }
 
     /**
-     * @param string $accessToken
+     * @param ?string $accessToken
      * @param string $calendarId
      * @param string $eventId
      * @throws Throwable
      * @author Dmytro Feshchenko <dimafe2000@gmail.com>
      */
-    public static function removeEvent(string $accessToken, string $calendarId, string $eventId): void
+    public static function removeEvent(?string $accessToken, string $calendarId, string $eventId): void
     {
         if ($calendarService = self::getGoogleCalendarService($accessToken)) {
             $calendarService->events->delete($calendarId, $eventId);
@@ -160,7 +160,7 @@ class GoogleService
     }
 
     /**
-     * @param string $accessToken
+     * @param ?string $accessToken
      * @param string $calendarId
      * @param string $eventId
      * @param Google_Service_Calendar_Event $event
@@ -168,7 +168,7 @@ class GoogleService
      * @throws Throwable
      * @author Dmytro Feshchenko <dimafe2000@gmail.com>
      */
-    public static function updateEvent(string $accessToken, string $calendarId, string $eventId, Google_Service_Calendar_Event $event): ?Event
+    public static function updateEvent(?string $accessToken, string $calendarId, string $eventId, Google_Service_Calendar_Event $event): ?Event
     {
         if ($calendarService = self::getGoogleCalendarService($accessToken)) {
             return $calendarService->events->patch($calendarId, $eventId, $event);
