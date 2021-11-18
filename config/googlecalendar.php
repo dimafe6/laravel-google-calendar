@@ -13,7 +13,7 @@ return [
     |
     */
 
-    'max_results_per_page' => 2500,
+    'max_results_per_page' => env('GOOGLE_CALENDAR_MAX_RESULTS_PER_PAGE', 2500),
 
     /*
     |--------------------------------------------------------------------------
@@ -26,7 +26,7 @@ return [
     |
     */
 
-    'time_min_months' => 6,
+    'time_min_months' => env('GOOGLE_CALENDAR_TIME_MIN_MONTHS', 6),
 
     /*
     |--------------------------------------------------------------------------
@@ -39,7 +39,7 @@ return [
     |
     */
 
-    'time_max_months' => 6,
+    'time_max_months' => env('GOOGLE_CALENDAR_TIME_MAX_MONTHS', 6),
 
     /*
     |--------------------------------------------------------------------------
@@ -50,5 +50,41 @@ return [
     |
     */
 
-    'sync_on_create' => false,
+    'sync_on_create' => env('GOOGLE_CALENDAR_SYNC_ON_CREATE', false),
+
+    /*
+    |--------------------------------------------------------------------------
+    | Google webhook URL
+    |--------------------------------------------------------------------------
+    |
+    | The route path that listens to Google webhook notifications
+    |
+    */
+
+    'webhook_uri' => env('GOOGLE_CALENDAR_WEBHOOK_URL', '/google/calendar/webhook'),
+
+    /*
+    |--------------------------------------------------------------------------
+    | Refresh webhook job scheduling
+    |--------------------------------------------------------------------------
+    |
+    | The cron expression to schedule job for refreshing webhook synchronizations.
+    | Example: '0 1 * * *' will run job every day at 01:00
+    |
+    */
+
+    'refresh_webhook_cron' => env('GOOGLE_CALENDAR_REFRESH_WEBHOOK_CRON', '0 1 * * *'),
+
+    /*
+    |--------------------------------------------------------------------------
+    | Periodic synchronization job scheduling
+    |--------------------------------------------------------------------------
+    |
+    | The cron expression to schedule a job for periodic sync all GoogleSynchronization models without resource_id.
+    | That job will update all resources that cannot be updated through the webhook
+    |
+    */
+
+    'periodic_sync_cron' => env('GOOGLE_CALENDAR_PERIODIC_SYNC_CRON', '*/15 * * * *'),
+
 ];

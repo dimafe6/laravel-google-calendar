@@ -4,6 +4,7 @@ namespace Dimafe6\GoogleCalendar\Jobs;
 
 use Dimafe6\GoogleCalendar\Contracts\SynchronizableInterface;
 use Dimafe6\GoogleCalendar\Contracts\SynchronizationInterface;
+use Dimafe6\GoogleCalendar\Facades\GoogleCalendar;
 use Google_Service_Calendar;
 use Google_Service_Exception;
 
@@ -37,60 +38,55 @@ abstract class SynchronizeGoogleResource
      * @throws Google_Service_Exception
      * @author Dmytro Feshchenko <dimafe2000@gmail.com>
      */
-    public function handle()
+    public function handle(): bool
     {
         // Start with an empty page token.
         $pageToken = null;
         $syncToken = $this->force ? null : $this->synchronization->token;
 
-        // Delegate service instantiation to the subclass.
-        $service = $this->getGoogleService();
+        $service = GoogleCalendar::getGoogleCalendarService($this->synchronizable->getAccessToken());
 
-        do {
-            try {
-                $options = compact('pageToken');
-                if ($syncToken) {
-                    $options['syncToken'] = $syncToken;
+        if ($service) {
+            do {
+                try {
+                    $options = compact('pageToken');
+                    if ($syncToken) {
+                        $options['syncToken'] = $syncToken;
+                    }
+
+                    $list = $this->getGoogleRequest($service, $options);
+                    // If we catch a Google_Service_Exception with a 410 status code.
+                } catch (Google_Service_Exception $e) {
+                    if ($e->getCode() === 410) {
+                        // Remove the synchronization's token.
+                        $this->synchronization->update(['token' => null]);
+
+                        // Drop all items (delegate this task to the subclasses).
+                        $this->dropAllSyncedItems();
+
+                        // Start again.
+                        return $this->handle();
+                    }
+
+                    throw $e;
                 }
 
-                $list = $this->getGoogleRequest($service, $options);
-                // If we catch a Google_Service_Exception with a 410 status code.
-            } catch (Google_Service_Exception $e) {
-                if ($e->getCode() === 410) {
-                    // Remove the synchronization's token.
-                    $this->synchronization->update(['token' => null]);
+                $this->syncItems($list->getItems());
 
-                    // Drop all items (delegate this task to the subclasses).
-                    $this->dropAllSyncedItems();
+                // Get the new page token from the response.
+                $pageToken = $list->getNextPageToken();
 
-                    // Start again.
-                    return $this->handle();
-                }
+                // Continue until the new page token is null.
+            } while ($pageToken);
 
-                throw $e;
-            }
+            $this->synchronization->update([
+                'token'                => $list->getNextSyncToken(),
+                'last_synchronized_at' => now(),
+            ]);
+        }
 
-            $this->syncItems($list->getItems());
-
-            // Get the new page token from the response.
-            $pageToken = $list->getNextPageToken();
-
-            // Continue until the new page token is null.
-        } while ($pageToken);
-
-        $this->synchronization->update([
-            'token'                => $list->getNextSyncToken(),
-            'last_synchronized_at' => now(),
-        ]);
+        return true;
     }
-
-    /**
-     * Returns google service by the provided access token
-     *
-     * @return Google_Service_Calendar
-     * @author Dmytro Feshchenko <dimafe2000@gmail.com>
-     */
-    abstract public function getGoogleService(): Google_Service_Calendar;
 
     /**
      * Returns a google API request for getting items for synchronization

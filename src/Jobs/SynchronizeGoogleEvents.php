@@ -30,14 +30,6 @@ class SynchronizeGoogleEvents extends SynchronizeGoogleResource implements Shoul
     /**
      * @inheritDoc
      */
-    public function getGoogleService(): Google_Service_Calendar
-    {
-        return GoogleCalendar::getGoogleCalendarService($this->synchronizable->googleAccount->access_token);
-    }
-
-    /**
-     * @inheritDoc
-     */
     public function getGoogleRequest(Google_Service_Calendar $service, array $options): Events
     {
         // Default configuration. This is available only if syncToken is not provided

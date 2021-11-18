@@ -5,6 +5,7 @@ namespace Dimafe6\GoogleCalendar\Models;
 use Dimafe6\GoogleCalendar\Concerns\Synchronizable;
 use Dimafe6\GoogleCalendar\Contracts\SynchronizableInterface;
 use Dimafe6\GoogleCalendar\Jobs\SynchronizeGoogleEvents;
+use Dimafe6\GoogleCalendar\Jobs\WatchGoogleEvents;
 use Google\Collection;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -68,5 +69,21 @@ class GoogleCalendar extends Model implements SynchronizableInterface
     public function events(): HasMany
     {
         return $this->hasMany(GoogleCalendarEvent::class);
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function getAccessToken(): string
+    {
+        return $this->googleAccount->access_token;
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function watch()
+    {
+        WatchGoogleEvents::dispatch($this);
     }
 }

@@ -2,7 +2,6 @@
 
 namespace Dimafe6\GoogleCalendar\Jobs;
 
-use Dimafe6\GoogleCalendar\Facades\GoogleCalendar;
 use Google\Service\Calendar\CalendarList;
 use Google\Service\Calendar\CalendarList as CalendarListModel;
 use Google\Service\Calendar\CalendarListEntry;
@@ -25,14 +24,6 @@ use Throwable;
 class SynchronizeGoogleCalendars extends SynchronizeGoogleResource implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
-
-    /**
-     * @inheritDoc
-     */
-    public function getGoogleService(): Google_Service_Calendar
-    {
-        return GoogleCalendar::getGoogleCalendarService($this->synchronizable->access_token);
-    }
 
     /**
      * @inheritDoc

@@ -60,7 +60,7 @@ class GoogleCalendarEvent extends Model
      * @return BelongsTo
      * @author Dmytro Feshchenko <dimafe2000@gmail.com>
      */
-    public function calendar()
+    public function calendar(): BelongsTo
     {
         return $this->belongsTo(GoogleCalendar::class, 'google_calendar_id');
     }

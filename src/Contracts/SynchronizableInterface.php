@@ -33,4 +33,20 @@ interface SynchronizableInterface
      * @author Dmytro Feshchenko <dimafe2000@gmail.com>
      */
     public function synchronize(bool $force = false): void;
+
+    /**
+     * Returns google account access token
+     *
+     * @return string
+     * @author Dmytro Feshchenko <dimafe2000@gmail.com>
+     */
+    public function getAccessToken(): string;
+
+    /**
+     * Start watching this resource
+     *
+     * @return void
+     * @author Dmytro Feshchenko <dimafe2000@gmail.com>
+     */
+    public function watch();
 }

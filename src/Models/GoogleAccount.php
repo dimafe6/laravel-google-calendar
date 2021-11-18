@@ -8,6 +8,7 @@ use Dimafe6\GoogleCalendar\Concerns\Synchronizable;
 use Dimafe6\GoogleCalendar\Contracts\SynchronizableInterface;
 use Dimafe6\GoogleCalendar\Facades\GoogleCalendar as CalendarFacade;
 use Dimafe6\GoogleCalendar\Jobs\SynchronizeGoogleCalendars;
+use Dimafe6\GoogleCalendar\Jobs\WatchGoogleCalendars;
 use Dimafe6\GoogleCalendar\Models\GoogleCalendar as GoogleCalendarModel;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -131,5 +132,21 @@ class GoogleAccount extends Model implements SynchronizableInterface
 
             return null;
         }
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function getAccessToken(): string
+    {
+        return $this->access_token;
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function watch()
+    {
+        WatchGoogleCalendars::dispatch($this);
     }
 }

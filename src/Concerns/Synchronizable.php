@@ -2,6 +2,7 @@
 
 namespace Dimafe6\GoogleCalendar\Concerns;
 
+use Dimafe6\GoogleCalendar\Contracts\SynchronizableInterface;
 use Dimafe6\GoogleCalendar\Models\GoogleSynchronization;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\MorphOne;
@@ -11,6 +12,7 @@ use Illuminate\Database\Eloquent\Relations\MorphOne;
  * @package Dimafe6\GoogleCalendar\Concerns
  * @author Dmytro Feshchenko <dimafe2000@gmail.com>
  * @mixin Model
+ * @implements SynchronizableInterface
  */
 trait Synchronizable
 {
@@ -49,4 +51,9 @@ trait Synchronizable
      * @author Dmytro Feshchenko <dimafe2000@gmail.com>
      */
     abstract public function synchronize(bool $force = false): void;
+
+    /**
+     * @inheritDoc
+     */
+    abstract public function getAccessToken(): string;
 }
