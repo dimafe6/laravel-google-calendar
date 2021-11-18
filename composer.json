@@ -1,6 +1,7 @@
 {
     "name": "dimafe6/laravel-google-calendar",
     "description": "",
+    "version": "dev-1.0.0",
     "license": "MIT",
     "authors": [
         {
@@ -28,11 +29,6 @@
     "autoload": {
         "psr-4": {
             "Dimafe6\\GoogleCalendar\\": "src/"
-        }
-    },
-    "autoload-dev": {
-        "psr-4": {
-            "Dimafe6\\GoogleCalendar\\Tests\\": "tests"
         }
     },
     "extra": {
