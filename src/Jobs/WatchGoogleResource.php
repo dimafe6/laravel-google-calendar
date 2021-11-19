@@ -22,7 +22,7 @@ use Illuminate\Support\Facades\Log;
 abstract class WatchGoogleResource
 {
     protected SynchronizableInterface $synchronizable;
-    private SynchronizationInterface $synchronization;
+    protected SynchronizationInterface $synchronization;
 
     /**
      * Constructor for WatchGoogleResource
