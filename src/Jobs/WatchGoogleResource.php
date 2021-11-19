@@ -3,10 +3,12 @@
 namespace Dimafe6\GoogleCalendar\Jobs;
 
 use Dimafe6\GoogleCalendar\Contracts\SynchronizableInterface;
+use Dimafe6\GoogleCalendar\Contracts\SynchronizationInterface;
 use Dimafe6\GoogleCalendar\Facades\GoogleCalendar;
 use Google\Service\Calendar\Channel;
 use Google_Service_Calendar;
 use Google_Service_Exception;
+use Illuminate\Queue\Middleware\WithoutOverlapping;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Log;
 
@@ -20,6 +22,7 @@ use Illuminate\Support\Facades\Log;
 abstract class WatchGoogleResource
 {
     protected SynchronizableInterface $synchronizable;
+    private SynchronizationInterface $synchronization;
 
     /**
      * Constructor for WatchGoogleResource
@@ -29,6 +32,7 @@ abstract class WatchGoogleResource
     public function __construct(SynchronizableInterface $synchronizable)
     {
         $this->synchronizable = $synchronizable;
+        $this->synchronization = $synchronizable->synchronization;
     }
 
     /**
@@ -38,18 +42,16 @@ abstract class WatchGoogleResource
      */
     public function handle()
     {
-        $synchronization = $this->synchronizable->synchronization;
-
         $service = GoogleCalendar::getGoogleCalendarService($this->synchronizable->getAccessToken());
 
         if ($service) {
             try {
-                $response = $this->getGoogleRequest($service, $synchronization->asGoogleChannel());
+                $response = $this->getGoogleRequest($service, $this->synchronization->asGoogleChannel());
                 Log::info('WatchGoogleResource');
 
                 // We can now update our synchronization model
                 // with the provided resource_id and expired_at.
-                $synchronization->update([
+                $this->synchronization->update([
                     'resource_id' => $response->getResourceId(),
                     'expired_at'  => Carbon::createFromTimestampMs($response->getExpiration())
                 ]);
@@ -61,6 +63,17 @@ abstract class WatchGoogleResource
                 // Instead, we will sync it manually at regular interval.
             }
         }
+    }
+
+    /**
+     * Prevent overlapping
+     *
+     * @return array
+     * @author Dmytro Feshchenko <dimafe2000@gmail.com>
+     */
+    public function middleware()
+    {
+        return [(new WithoutOverlapping($this->synchronization->id))->releaseAfter(10)];
     }
 
     /**

@@ -7,6 +7,7 @@ use Dimafe6\GoogleCalendar\Contracts\SynchronizationInterface;
 use Dimafe6\GoogleCalendar\Facades\GoogleCalendar;
 use Google_Service_Calendar;
 use Google_Service_Exception;
+use Illuminate\Queue\Middleware\WithoutOverlapping;
 
 /**
  * Class SynchronizeGoogleResource
@@ -86,6 +87,17 @@ abstract class SynchronizeGoogleResource
         }
 
         return true;
+    }
+
+    /**
+     * Prevent overlapping
+     *
+     * @return array
+     * @author Dmytro Feshchenko <dimafe2000@gmail.com>
+     */
+    public function middleware()
+    {
+        return [(new WithoutOverlapping($this->synchronization->id))->releaseAfter(10)];
     }
 
     /**

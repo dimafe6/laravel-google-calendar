@@ -37,11 +37,15 @@ class GoogleCalendarServiceProvider extends ServiceProvider
             $schedule = $this->app->make(Schedule::class);
 
             if ($refreshJobExpression = config('googlecalendar.refresh_webhook_cron')) {
-                $schedule->job(new RefreshWebhookSynchronizations())->cron($refreshJobExpression);
+                $schedule->job(new RefreshWebhookSynchronizations())
+                    ->withoutOverlapping(1)
+                    ->cron($refreshJobExpression);
             }
 
             if ($syncJobExpression = config('googlecalendar.periodic_sync_cron')) {
-                $schedule->job(new PeriodicSynchronizations())->cron($syncJobExpression);
+                $schedule->job(new PeriodicSynchronizations())
+                    ->withoutOverlapping(1)
+                    ->cron($syncJobExpression);
             }
         });
     }
