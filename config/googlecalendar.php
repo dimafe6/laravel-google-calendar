@@ -3,6 +3,17 @@
 return [
     /*
     |--------------------------------------------------------------------------
+    | Google OAuth 2.0 access
+    |--------------------------------------------------------------------------
+    |
+    | Determines the path to the auth config JSON file from the google
+    |
+    */
+
+    'google_auth_config_json' => env('GOOGLE_CALENDAR_AUTH_CONFIG', storage_path('app/google-calendar/client_secret.json')),
+
+    /*
+    |--------------------------------------------------------------------------
     | Maximum number of events per page
     |--------------------------------------------------------------------------
     |

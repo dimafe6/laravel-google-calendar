@@ -34,7 +34,7 @@ class GoogleService
 
         $client = new Google_Client();
         $client->setApplicationName('Test');
-        $client->setAuthConfig(config('services.google.auth_config'));
+        $client->setAuthConfig(config('googlecalendar.google_auth_config_json'));
         $client->setAccessType('offline');
         $client->setAccessToken($accessToken);
 
