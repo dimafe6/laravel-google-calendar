@@ -11,6 +11,7 @@ use Illuminate\Database\Eloquent\Relations\HasOne;
  * @package Dimafe6\GoogleCalendar\Concerns
  * @author Dmytro Feshchenko <dimafe2000@gmail.com>
  * @mixin User
+ * @property GoogleAccount $googleAccount
  */
 trait HasGoogleAccount
 {
@@ -21,5 +22,16 @@ trait HasGoogleAccount
     public function googleAccount(): HasOne
     {
         return $this->hasOne(GoogleAccount::class);
+    }
+
+    /**
+     * Delete google account with all calendars and events
+     *
+     * @author Dmytro Feshchenko <dimafe2000@gmail.com>
+     */
+    public function googleAccountLogout()
+    {
+        $this->googleAccount->calendars->each->delete();
+        $this->googleAccount->delete();
     }
 }
