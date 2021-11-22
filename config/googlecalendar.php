@@ -3,6 +3,17 @@
 return [
     /*
     |--------------------------------------------------------------------------
+    | Your application name
+    |--------------------------------------------------------------------------
+    |
+    | Determines the application name for the Google Oauth 2.0 consent screen
+    |
+    */
+
+    'application_name' => env('GOOGLE_CALENDAR_APPLICATION_NAME', config('app.name')),
+
+    /*
+    |--------------------------------------------------------------------------
     | Google OAuth 2.0 access
     |--------------------------------------------------------------------------
     |
