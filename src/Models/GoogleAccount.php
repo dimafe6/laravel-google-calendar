@@ -152,7 +152,7 @@ class GoogleAccount extends Model implements SynchronizableInterface
     /**
      * @inheritDoc
      */
-    public function getAccessToken(): string
+    public function getAccessToken(): ?string
     {
         return $this->access_token;
     }

@@ -37,10 +37,10 @@ interface SynchronizableInterface
     /**
      * Returns google account access token
      *
-     * @return string
+     * @return ?string
      * @author Dmytro Feshchenko <dimafe2000@gmail.com>
      */
-    public function getAccessToken(): string;
+    public function getAccessToken(): ?string;
 
     /**
      * Start watching this resource

@@ -55,5 +55,5 @@ trait Synchronizable
     /**
      * @inheritDoc
      */
-    abstract public function getAccessToken(): string;
+    abstract public function getAccessToken(): ?string;
 }

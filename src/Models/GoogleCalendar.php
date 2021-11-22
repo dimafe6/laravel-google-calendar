@@ -74,9 +74,9 @@ class GoogleCalendar extends Model implements SynchronizableInterface
     /**
      * @inheritDoc
      */
-    public function getAccessToken(): string
+    public function getAccessToken(): ?string
     {
-        return $this->googleAccount->access_token;
+        return optional($this->googleAccount)->access_token;
     }
 
     /**
