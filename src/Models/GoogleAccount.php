@@ -4,12 +4,14 @@ namespace Dimafe6\GoogleCalendar\Models;
 
 use App\Models\User;
 use Carbon\Carbon;
+use Dimafe6\Database\Factories\GoogleAccountFactory;
 use Dimafe6\GoogleCalendar\Concerns\Synchronizable;
 use Dimafe6\GoogleCalendar\Contracts\SynchronizableInterface;
 use Dimafe6\GoogleCalendar\Facades\GoogleCalendar as CalendarFacade;
 use Dimafe6\GoogleCalendar\Jobs\SynchronizeGoogleCalendars;
 use Dimafe6\GoogleCalendar\Jobs\WatchGoogleCalendars;
 use Dimafe6\GoogleCalendar\Models\GoogleCalendar as GoogleCalendarModel;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -40,7 +42,7 @@ use Throwable;
  */
 class GoogleAccount extends Model implements SynchronizableInterface
 {
-    use Synchronizable;
+    use Synchronizable, HasFactory;
 
     public const TABLE = 'google_accounts';
 
@@ -90,6 +92,17 @@ class GoogleAccount extends Model implements SynchronizableInterface
     }
 
     /**
+     * Delete google account with all calendars and events
+     *
+     * @author Dmytro Feshchenko <dimafe2000@gmail.com>
+     */
+    public function logout()
+    {
+        $this->calendars->each->delete();
+        $this->delete();
+    }
+
+    /**
      * Returns google account access token. The access token will be refreshed if it is expired
      *
      * @return ?string
@@ -101,13 +114,15 @@ class GoogleAccount extends Model implements SynchronizableInterface
             // Automatically update access token if it expired
             if ($this->access_token_expire && $this->access_token_expire->subMinutes(5)->isPast()) {
                 if ($client = CalendarFacade::getGoogleClient($this->attributes['access_token'])) {
+                    Log::info("Fetch access token with refresh token for account {$this->id}");
                     $result = $client->fetchAccessTokenWithRefreshToken($this->refresh_token);
 
                     if (isset($result['error'])) {
-                        Log::error("User {$this->id} has invalid google access token");
+                        Log::error("Account {$this->id} has invalid google access token");
                         Log::error($result['error_description']);
+                        Log::info('Deleting account. Needs to relogin');
 
-                        $this->delete();
+                        $this->logout();
 
                         return null;
                     }
@@ -148,5 +163,15 @@ class GoogleAccount extends Model implements SynchronizableInterface
     public function watch()
     {
         WatchGoogleCalendars::dispatch($this);
+    }
+
+    /**
+     * Create a new factory instance for the model.
+     *
+     * @return GoogleAccountFactory
+     */
+    protected static function newFactory()
+    {
+        return GoogleAccountFactory::new();
     }
 }

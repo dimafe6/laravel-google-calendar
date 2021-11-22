@@ -23,15 +23,4 @@ trait HasGoogleAccount
     {
         return $this->hasOne(GoogleAccount::class);
     }
-
-    /**
-     * Delete google account with all calendars and events
-     *
-     * @author Dmytro Feshchenko <dimafe2000@gmail.com>
-     */
-    public function googleAccountLogout()
-    {
-        $this->googleAccount->calendars->each->delete();
-        $this->googleAccount->delete();
-    }
 }
