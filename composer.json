@@ -13,13 +13,15 @@
     "keywords": ["Laravel", "GoogleCalendar"],
     "require": {
         "php": "^7.4",
+        "ext-intl": "*",
+        "ext-json": "*",
+        "ext-redis": "*",
         "illuminate/support": "~7|~8",
         "laravel/socialite": "^5.2",
         "google/apiclient": "^2.0",
         "ramsey/uuid": "^4.2",
         "socialiteproviders/google": "^4.1",
-        "rlanvin/php-rrule": "^2.3",
-        "ext-json": "*"
+        "rlanvin/php-rrule": "^2.3"
     },
     "require-dev": {
         "phpunit/phpunit": "~9.0",

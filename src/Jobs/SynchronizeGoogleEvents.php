@@ -4,7 +4,6 @@ namespace Dimafe6\GoogleCalendar\Jobs;
 
 use Carbon\Carbon;
 use DateTimeInterface;
-use Dimafe6\GoogleCalendar\Facades\GoogleCalendar;
 use Google\Service\Calendar\Event;
 use Google\Service\Calendar\EventDateTime;
 use Google\Service\Calendar\Events;

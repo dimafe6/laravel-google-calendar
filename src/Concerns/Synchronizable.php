@@ -3,6 +3,7 @@
 namespace Dimafe6\GoogleCalendar\Concerns;
 
 use Dimafe6\GoogleCalendar\Contracts\SynchronizableInterface;
+use Dimafe6\GoogleCalendar\Models\GoogleAccount;
 use Dimafe6\GoogleCalendar\Models\GoogleSynchronization;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\MorphOne;
@@ -56,4 +57,9 @@ trait Synchronizable
      * @inheritDoc
      */
     abstract public function getAccessToken(): ?string;
+
+    /**
+     * @inheritDoc
+     */
+    abstract public function getGoogleAccount(): ?GoogleAccount;
 }

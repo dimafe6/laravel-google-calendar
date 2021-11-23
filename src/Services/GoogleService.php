@@ -2,6 +2,7 @@
 
 namespace Dimafe6\GoogleCalendar\Services;
 
+use Dimafe6\GoogleCalendar\Models\GoogleAccount;
 use Google\Service\Calendar\Calendar;
 use Google\Service\Calendar\CalendarListEntry;
 use Google\Service\Calendar\Event;
@@ -9,6 +10,7 @@ use Google_Client;
 use Google_Service_Calendar;
 use Google_Service_Calendar_Calendar;
 use Google_Service_Calendar_Event;
+use Google_Service_Exception;
 use Throwable;
 
 /**
@@ -61,6 +63,29 @@ class GoogleService
     }
 
     /**
+     * Process Google service exceptions
+     *
+     * @param Throwable $exception
+     * @param string|null $accessToken
+     * @throws Throwable
+     * @author Dmytro Feshchenko <dimafe2000@gmail.com>
+     */
+    protected static function processServiceException(Throwable $exception, ?string $accessToken)
+    {
+        if ($exception->getCode() === 401) {
+            if ($accessToken) {
+                if ($account = GoogleAccount::where('access_token', $accessToken)->first()) {
+                    $account->forceLogout();
+
+                    return;
+                }
+            }
+        }
+
+        throw $exception;
+    }
+
+    /**
      * @param string|null $accessToken
      * @param array $params
      * @return CalendarListEntry[]
@@ -69,8 +94,12 @@ class GoogleService
      */
     public static function getCalendars(?string $accessToken, array $params = []): array
     {
-        if ($calendarService = self::getGoogleCalendarService($accessToken)) {
-            return $calendarService->calendarList->listCalendarList($params)->getItems();
+        try {
+            if ($calendarService = self::getGoogleCalendarService($accessToken)) {
+                return $calendarService->calendarList->listCalendarList($params)->getItems();
+            }
+        } catch (Google_Service_Exception $exception) {
+            self::processServiceException($exception, $accessToken);
         }
 
         return [];
@@ -85,8 +114,12 @@ class GoogleService
      */
     public static function getCalendarById(?string $accessToken, string $calendarId): ?Calendar
     {
-        if ($calendarService = self::getGoogleCalendarService($accessToken)) {
-            return $calendarService->calendars->get($calendarId);
+        try {
+            if ($calendarService = self::getGoogleCalendarService($accessToken)) {
+                return $calendarService->calendars->get($calendarId);
+            }
+        } catch (Google_Service_Exception $exception) {
+            self::processServiceException($exception, $accessToken);
         }
 
         return null;
@@ -102,8 +135,12 @@ class GoogleService
      */
     public static function getEvent(?string $accessToken, string $calendarId, string $eventId): ?Event
     {
-        if ($calendarService = self::getGoogleCalendarService($accessToken)) {
-            return $calendarService->events->get($calendarId, $eventId);
+        try {
+            if ($calendarService = self::getGoogleCalendarService($accessToken)) {
+                return $calendarService->events->get($calendarId, $eventId);
+            }
+        } catch (Google_Service_Exception $exception) {
+            self::processServiceException($exception, $accessToken);
         }
 
         return null;
@@ -118,11 +155,15 @@ class GoogleService
      */
     public static function createCalendarBySummary(?string $accessToken, string $summary): ?Calendar
     {
-        if ($calendarService = self::getGoogleCalendarService($accessToken)) {
-            $calendar = new Google_Service_Calendar_Calendar();
-            $calendar->setSummary($summary);
+        try {
+            if ($calendarService = self::getGoogleCalendarService($accessToken)) {
+                $calendar = new Google_Service_Calendar_Calendar();
+                $calendar->setSummary($summary);
 
-            return $calendarService->calendars->insert($calendar);
+                return $calendarService->calendars->insert($calendar);
+            }
+        } catch (Google_Service_Exception $exception) {
+            self::processServiceException($exception, $accessToken);
         }
 
         return null;
@@ -138,8 +179,12 @@ class GoogleService
      */
     public static function createEvent(?string $accessToken, string $calendarId, Google_Service_Calendar_Event $event): ?Event
     {
-        if ($calendarService = self::getGoogleCalendarService($accessToken)) {
-            return $calendarService->events->insert($calendarId, $event);
+        try {
+            if ($calendarService = self::getGoogleCalendarService($accessToken)) {
+                return $calendarService->events->insert($calendarId, $event);
+            }
+        } catch (Google_Service_Exception $exception) {
+            self::processServiceException($exception, $accessToken);
         }
 
         return null;
@@ -154,8 +199,12 @@ class GoogleService
      */
     public static function removeEvent(?string $accessToken, string $calendarId, string $eventId): void
     {
-        if ($calendarService = self::getGoogleCalendarService($accessToken)) {
-            $calendarService->events->delete($calendarId, $eventId);
+        try {
+            if ($calendarService = self::getGoogleCalendarService($accessToken)) {
+                $calendarService->events->delete($calendarId, $eventId);
+            }
+        } catch (Google_Service_Exception $exception) {
+            self::processServiceException($exception, $accessToken);
         }
     }
 
@@ -170,8 +219,12 @@ class GoogleService
      */
     public static function updateEvent(?string $accessToken, string $calendarId, string $eventId, Google_Service_Calendar_Event $event): ?Event
     {
-        if ($calendarService = self::getGoogleCalendarService($accessToken)) {
-            return $calendarService->events->patch($calendarId, $eventId, $event);
+        try {
+            if ($calendarService = self::getGoogleCalendarService($accessToken)) {
+                return $calendarService->events->patch($calendarId, $eventId, $event);
+            }
+        } catch (Google_Service_Exception $exception) {
+            self::processServiceException($exception, $accessToken);
         }
 
         return null;

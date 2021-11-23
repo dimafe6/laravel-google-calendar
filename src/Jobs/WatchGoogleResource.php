@@ -10,7 +10,6 @@ use Google_Service_Calendar;
 use Google_Service_Exception;
 use Illuminate\Queue\Middleware\WithoutOverlapping;
 use Illuminate\Support\Carbon;
-use Illuminate\Support\Facades\Log;
 
 /**
  * Class WatchGoogleResource
@@ -69,7 +68,9 @@ abstract class WatchGoogleResource
                     'expired_at'  => Carbon::createFromTimestampMs($response->getExpiration())
                 ]);
             } catch (Google_Service_Exception $e) {
-                Log::warning($e->getMessage());
+                if ($e->getCode() === 401) {
+                    optional($this->synchronizable->getGoogleAccount())->forceLogout();
+                }
 
                 // If we reach an error at this point, it is likely that
                 // webhook notifications are forbidden for this resource.

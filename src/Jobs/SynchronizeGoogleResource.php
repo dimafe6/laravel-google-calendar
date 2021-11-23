@@ -83,6 +83,12 @@ abstract class SynchronizeGoogleResource
                         return $this->handle();
                     }
 
+                    if ($e->getCode() === 401) {
+                        optional($this->synchronizable->getGoogleAccount())->forceLogout();
+
+                        return true;
+                    }
+
                     throw $e;
                 }
 

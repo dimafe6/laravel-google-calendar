@@ -2,6 +2,7 @@
 
 namespace Dimafe6\GoogleCalendar\Contracts;
 
+use Dimafe6\GoogleCalendar\Models\GoogleAccount;
 use Illuminate\Database\Eloquent\Relations\MorphOne;
 
 /**
@@ -41,6 +42,14 @@ interface SynchronizableInterface
      * @author Dmytro Feshchenko <dimafe2000@gmail.com>
      */
     public function getAccessToken(): ?string;
+
+    /**
+     * Returns google account
+     *
+     * @return GoogleAccount|null
+     * @author Dmytro Feshchenko <dimafe2000@gmail.com>
+     */
+    public function getGoogleAccount(): ?GoogleAccount;
 
     /**
      * Start watching this resource

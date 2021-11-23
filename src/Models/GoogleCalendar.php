@@ -82,6 +82,14 @@ class GoogleCalendar extends Model implements SynchronizableInterface
     /**
      * @inheritDoc
      */
+    public function getGoogleAccount(): ?GoogleAccount
+    {
+        return $this->googleAccount;
+    }
+
+    /**
+     * @inheritDoc
+     */
     public function watch()
     {
         WatchGoogleEvents::dispatch($this)->afterCommit();
