@@ -111,7 +111,7 @@ abstract class SynchronizeGoogleResource
      */
     public function middleware()
     {
-        return [(new WithoutOverlapping($this->synchronization->id))];
+        return [(new WithoutOverlapping($this->synchronization->synchronizable_id))];
     }
 
     /**
