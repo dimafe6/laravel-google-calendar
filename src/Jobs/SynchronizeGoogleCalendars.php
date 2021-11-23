@@ -11,7 +11,6 @@ use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
-use Illuminate\Support\Facades\DB;
 use Throwable;
 
 /**
@@ -51,30 +50,20 @@ class SynchronizeGoogleCalendars extends SynchronizeGoogleResource implements Sh
         }
 
         // Get all not deleted google calendars
-        $newCalendars = $calendars->whereNotIn('id', $deletedCalendarsIDs);
+        $newCalendars = $calendars->whereNotIn('id', $deletedCalendarsIDs)->unique('id');
 
-        try {
-            DB::beginTransaction();
-
-            // Create or update all google calendars on our database
-            foreach ($newCalendars as $googleCalendar) {
-                $this->synchronizable->calendars()->updateOrCreate(
-                    [
-                        'google_id' => $googleCalendar->id,
-                    ],
-                    [
-                        'name'     => $googleCalendar->summary,
-                        'color'    => $googleCalendar->backgroundColor,
-                        'timezone' => $googleCalendar->timeZone,
-                    ]
-                );
-            }
-
-            DB::commit();
-        } catch (Throwable $exception) {
-            DB::rollBack();
-
-            throw $exception;
+        // Create or update all google calendars on our database
+        foreach ($newCalendars as $googleCalendar) {
+            $this->synchronizable->calendars()->updateOrCreate(
+                [
+                    'google_id' => $googleCalendar->id,
+                ],
+                [
+                    'name'     => $googleCalendar->summary,
+                    'color'    => $googleCalendar->backgroundColor,
+                    'timezone' => $googleCalendar->timeZone,
+                ]
+            );
         }
     }
 

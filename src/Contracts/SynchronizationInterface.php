@@ -4,11 +4,18 @@ namespace Dimafe6\GoogleCalendar\Contracts;
 
 use Google_Service_Calendar_Channel;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
+use Illuminate\Support\Carbon;
 
 /**
  * Interface SynchronizationInterface
  * @package Dimafe6\GoogleCalendar\Contracts
  * @author Dmytro Feshchenko <dimafe2000@gmail.com>
+ * @property string $synchronizable_type
+ * @property integer $synchronizable_id
+ * @property string $token
+ * @property Carbon $last_synchronized_at
+ * @property string $resource_id
+ * @property Carbon $expired_at
  */
 interface SynchronizationInterface
 {
