@@ -21,6 +21,27 @@ class RefreshWebhookSynchronizations implements ShouldQueue
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
     /**
+     * The number of times the job may be attempted.
+     *
+     * @var int
+     */
+    public int $tries = 1;
+
+    /**
+     * The maximum number of unhandled exceptions to allow before failing.
+     *
+     * @var int
+     */
+    public int $maxExceptions = 1;
+
+    /**
+     * Delete the job if its models no longer exist.
+     *
+     * @var bool
+     */
+    public bool $deleteWhenMissingModels = true;
+
+    /**
      * Monitor webhook synchronizations and make sure they are refreshed before they expire
      *
      * @return void

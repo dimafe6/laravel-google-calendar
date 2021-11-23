@@ -21,6 +21,20 @@ use Illuminate\Support\Facades\Log;
  */
 abstract class WatchGoogleResource
 {
+    /**
+     * The number of times the job may be attempted.
+     *
+     * @var int
+     */
+    public int $tries = 5;
+
+    /**
+     * Delete the job if its models no longer exist.
+     *
+     * @var bool
+     */
+    public bool $deleteWhenMissingModels = true;
+
     protected SynchronizableInterface $synchronizable;
     protected SynchronizationInterface $synchronization;
 
@@ -47,7 +61,6 @@ abstract class WatchGoogleResource
         if ($service) {
             try {
                 $response = $this->getGoogleRequest($service, $this->synchronization->asGoogleChannel());
-                Log::info('WatchGoogleResource');
 
                 // We can now update our synchronization model
                 // with the provided resource_id and expired_at.
@@ -73,7 +86,17 @@ abstract class WatchGoogleResource
      */
     public function middleware()
     {
-        return [(new WithoutOverlapping($this->synchronization->id))->releaseAfter(10)];
+        return [(new WithoutOverlapping($this->synchronization->id))];
+    }
+
+    /**
+     * Calculate the number of seconds to wait before retrying the job.
+     *
+     * @return array
+     */
+    public function backoff()
+    {
+        return range(30, 300, 270 / $this->tries);
     }
 
     /**

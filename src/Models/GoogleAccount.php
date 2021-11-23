@@ -16,6 +16,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Log;
 use Laravel\Socialite\Facades\Socialite;
 use Throwable;
@@ -70,7 +71,7 @@ class GoogleAccount extends Model implements SynchronizableInterface
      */
     public function synchronize(bool $force = false): void
     {
-        SynchronizeGoogleCalendars::dispatch($this, $force);
+        SynchronizeGoogleCalendars::dispatch($this, $force)->afterCommit();
     }
 
     /**
@@ -114,30 +115,39 @@ class GoogleAccount extends Model implements SynchronizableInterface
             // Automatically update access token if it expired
             if ($this->access_token_expire && $this->access_token_expire->subMinutes(5)->isPast()) {
                 if ($client = CalendarFacade::getGoogleClient($this->attributes['access_token'])) {
-                    Log::info("Fetch access token with refresh token for account {$this->id}");
-                    $result = $client->fetchAccessTokenWithRefreshToken($this->refresh_token);
+                    $lock = Cache::lock('update-access-token-' . $this->id, 10);
 
-                    if (isset($result['error'])) {
-                        Log::error("Account {$this->id} has invalid google access token");
-                        Log::error($result['error_description']);
-                        Log::info('Deleting account. Needs to relogin');
+                    if ($lock->get()) {
+                        Log::info("Fetch access token with refresh token for account {$this->id}");
+                        $result = $client->fetchAccessTokenWithRefreshToken($this->refresh_token);
 
-                        $this->logout();
+                        if (isset($result['error'])) {
+                            Log::error("Account {$this->id} has invalid google access token");
+                            Log::error($result['error_description']);
+                            Log::info('Deleting account. Needs to relogin');
 
-                        return null;
+                            $this->logout();
+
+                            return null;
+                        }
+
+                        $user = Socialite::driver('google')->userFromToken($client->getAccessToken()['access_token']);
+
+                        self::update([
+                            'access_token'        => $client->getAccessToken()['access_token'],
+                            'refresh_token'       => $client->getAccessToken()['refresh_token'],
+                            'access_token_expire' => now()->addSeconds($client->getAccessToken()['expires_in']),
+                            'user_name'           => $user->name,
+                            'email'               => $user->email,
+                            'nickname'            => $user->nickname,
+                            'avatar'              => $user->avatar,
+                        ]);
+
+                        $lock->release();
+                    } else {
+                        sleep(2);
+                        return $this->access_token;
                     }
-
-                    $user = Socialite::driver('google')->userFromToken($client->getAccessToken()['access_token']);
-
-                    self::update([
-                        'access_token'        => $client->getAccessToken()['access_token'],
-                        'refresh_token'       => $client->getAccessToken()['refresh_token'],
-                        'access_token_expire' => now()->addSeconds($client->getAccessToken()['expires_in']),
-                        'user_name'           => $user->name,
-                        'email'               => $user->email,
-                        'nickname'            => $user->nickname,
-                        'avatar'              => $user->avatar,
-                    ]);
                 }
             }
 
@@ -162,7 +172,7 @@ class GoogleAccount extends Model implements SynchronizableInterface
      */
     public function watch()
     {
-        WatchGoogleCalendars::dispatch($this);
+        WatchGoogleCalendars::dispatch($this)->afterCommit();
     }
 
     /**

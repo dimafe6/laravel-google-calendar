@@ -89,7 +89,7 @@ class SynchronizeGoogleEvents extends SynchronizeGoogleResource implements Shoul
             $data = [
                 'google_id'          => $event->id,
                 'google_calendar_id' => $this->synchronizable->id,
-                'summary'            => $event->summary,
+                'summary'            => $event->summary ?? '',
                 'status'             => $event->status,
                 'description'        => $event->description,
                 'html_link'          => $event->htmlLink,

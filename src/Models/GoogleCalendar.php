@@ -50,7 +50,7 @@ class GoogleCalendar extends Model implements SynchronizableInterface
      */
     public function synchronize(bool $force = false): void
     {
-        SynchronizeGoogleEvents::dispatch($this, $force);
+        SynchronizeGoogleEvents::dispatch($this, $force)->afterCommit();
     }
 
     /**
@@ -84,6 +84,6 @@ class GoogleCalendar extends Model implements SynchronizableInterface
      */
     public function watch()
     {
-        WatchGoogleEvents::dispatch($this);
+        WatchGoogleEvents::dispatch($this)->afterCommit();
     }
 }
