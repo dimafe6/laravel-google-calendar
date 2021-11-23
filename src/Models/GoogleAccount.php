@@ -104,6 +104,26 @@ class GoogleAccount extends Model implements SynchronizableInterface
     }
 
     /**
+     * Force logout without model event generation
+     *
+     * @author Dmytro Feshchenko <dimafe2000@gmail.com>
+     */
+    public function forceLogout()
+    {
+        $account = $this;
+        GoogleCalendarModel::withoutEvents(function () use ($account) {
+            $account->calendars->each->delete();
+        });
+
+        GoogleSynchronization::withoutEvents(function () use ($account) {
+            $account->calendars->each(fn(GoogleCalendarModel $c) => optional($c->synchronization)->delete());
+            $account->synchronization()->delete();
+        });
+
+        self::withoutEvents(fn() => $this->delete());
+    }
+
+    /**
      * Returns google account access token. The access token will be refreshed if it is expired
      *
      * @return ?string
@@ -126,7 +146,7 @@ class GoogleAccount extends Model implements SynchronizableInterface
                             Log::error($result['error_description']);
                             Log::info('Deleting account. Needs to relogin');
 
-                            $this->logout();
+                            $this->forceLogout();
 
                             return null;
                         }
