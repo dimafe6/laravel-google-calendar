@@ -99,8 +99,12 @@ class GoogleAccount extends Model implements SynchronizableInterface
      */
     public function logout()
     {
-        $this->calendars->each->delete();
-        $this->delete();
+        if ($this->access_token) {
+            $this->calendars->each->delete();
+            $this->delete();
+        } else {
+            $this->forceLogout();
+        }
     }
 
     /**
