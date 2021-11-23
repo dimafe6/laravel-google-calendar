@@ -15,7 +15,7 @@ class GoogleCalendarEvent extends Migration
     {
         Schema::create('google_calendar_events', function (Blueprint $table) {
             $table->id();
-            $table->string('google_id')->unique();;
+            $table->string('google_id');
             $table->integer('google_calendar_id');
             $table->text('summary');
             $table->text('description')->nullable();
@@ -32,6 +32,8 @@ class GoogleCalendarEvent extends Migration
             $table->foreign('google_calendar_id')
                 ->references('id')->on('google_calendars')
                 ->onDelete('cascade');
+
+            $table->unique(['google_id', 'google_calendar_id']);
         });
     }
 
