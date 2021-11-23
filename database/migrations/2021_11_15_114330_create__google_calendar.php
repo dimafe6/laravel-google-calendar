@@ -15,7 +15,7 @@ class CreateGoogleCalendar extends Migration
     {
         Schema::create('google_calendars', function (Blueprint $table) {
             $table->id();
-            $table->string('google_id')->unique()->comment('Google calendar identifier');
+            $table->string('google_id')->comment('Google calendar identifier');
             $table->integer('google_account_id')->comment('Reference to the google_accounts table');
             $table->text('name')->comment('Calendar name');
             $table->string('color')->nullable()->comment('Calendar color');
@@ -24,6 +24,8 @@ class CreateGoogleCalendar extends Migration
             $table->foreign('google_account_id')
                 ->references('id')->on('google_accounts')
                 ->onDelete('cascade');
+
+            $table->unique(['google_id', 'google_account_id']);
         });
     }
 

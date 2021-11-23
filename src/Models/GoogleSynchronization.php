@@ -49,7 +49,7 @@ class GoogleSynchronization extends Model implements SynchronizationInterface
      */
     public function ping(): void
     {
-        $this->synchronizable->synchronize();
+        optional($this->synchronizable)->synchronize();
     }
 
     /**
