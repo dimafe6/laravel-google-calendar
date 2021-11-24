@@ -15,7 +15,7 @@ class GoogleAccount extends Migration
     {
         Schema::create('google_accounts', function (Blueprint $table) {
             $table->id();
-            $table->string('google_id')->unique()->comment('Google account identifier');
+            $table->string('google_id')->comment('Google account identifier');
             $table->integer('user_id')->comment('Reference to the users table');
             $table->string('user_name')->nullable()->comment('Google account user name');
             $table->string('nickname')->nullable()->comment('Google account user nickname');
@@ -28,6 +28,8 @@ class GoogleAccount extends Migration
             $table->foreign('user_id')
                 ->references('id')->on('users')
                 ->onDelete('cascade');
+
+            $table->unique(['google_id', 'user_id']);
         });
     }
 

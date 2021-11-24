@@ -100,7 +100,10 @@ class GoogleAccount extends Model implements SynchronizableInterface
     public function logout()
     {
         if ($this->access_token) {
-            $this->calendars->each->delete();
+            if ($this->calendars->count()) {
+                $this->calendars->each->delete();
+            }
+
             $this->delete();
         } else {
             $this->forceLogout();
