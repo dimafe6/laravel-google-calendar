@@ -15,14 +15,14 @@ class GoogleCalendarEvent extends Migration
     {
         Schema::create('google_calendar_events', function (Blueprint $table) {
             $table->id();
-            $table->string('google_id');
+            $table->text('google_id');
             $table->integer('google_calendar_id');
             $table->text('summary');
             $table->text('description')->nullable();
-            $table->string('status')->nullable();
-            $table->string('html_link')->nullable();
-            $table->string('hangout_link')->nullable();
-            $table->string('organizer_email')->nullable();
+            $table->text('status')->nullable();
+            $table->text('html_link')->nullable();
+            $table->text('hangout_link')->nullable();
+            $table->text('organizer_email')->nullable();
             $table->timestamp('date_start');
             $table->timestamp('date_end');
             $table->integer('duration');
