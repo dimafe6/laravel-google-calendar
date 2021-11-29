@@ -54,9 +54,10 @@ class GoogleCalendarEvent extends Model
         'all_day',
         'recurrence',
         'recurring_event_id',
+        'original_start_time',
     ];
 
-    protected $dates = ['date_start', 'date_end'];
+    protected $dates = ['date_start', 'date_end', 'original_start_time'];
 
     protected $casts = ['recurrence' => 'array'];
 

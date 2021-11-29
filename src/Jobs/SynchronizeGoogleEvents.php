@@ -79,19 +79,20 @@ class SynchronizeGoogleEvents extends SynchronizeGoogleResource implements Shoul
             $this->synchronizable->events()->updateOrCreate(
                 ['google_id' => $event->id],
                 [
-                    'google_calendar_id' => $this->synchronizable->id,
-                    'summary'            => $event->summary ?? '',
-                    'status'             => $event->status,
-                    'description'        => $event->description,
-                    'html_link'          => $event->htmlLink,
-                    'hangout_link'       => $event->hangoutLink,
-                    'organizer_email'    => optional($event->getOrganizer())->email,
-                    'date_start'         => $this->parseDatetime($event->start),
-                    'date_end'           => $this->parseDatetime($event->end),
-                    'all_day'            => $this->isAllDayEvent($event),
-                    'duration'           => $this->getDuration($event),
-                    'recurrence'         => $event->recurrence,
-                    'recurring_event_id' => $event->recurringEventId
+                    'google_calendar_id'  => $this->synchronizable->id,
+                    'summary'             => $event->summary ?? '',
+                    'status'              => $event->status,
+                    'description'         => $event->description,
+                    'html_link'           => $event->htmlLink,
+                    'hangout_link'        => $event->hangoutLink,
+                    'organizer_email'     => optional($event->getOrganizer())->email,
+                    'date_start'          => $this->parseDatetime($event->start),
+                    'date_end'            => $this->parseDatetime($event->end),
+                    'all_day'             => $this->isAllDayEvent($event),
+                    'duration'            => $this->getDuration($event),
+                    'recurrence'          => $event->recurrence,
+                    'recurring_event_id'  => $event->recurringEventId,
+                    'original_start_time' => $this->parseDatetime($event->getOriginalStartTime()),
                 ]);
         }
     }
@@ -111,13 +112,13 @@ class SynchronizeGoogleEvents extends SynchronizeGoogleResource implements Shoul
     /**
      * Returns UTC time for provided event
      *
-     * @param EventDateTime $googleDatetime
-     * @return Carbon
+     * @param ?EventDateTime $googleDatetime
+     * @return ?Carbon
      * @author Dmytro Feshchenko <dimafe2000@gmail.com>
      */
-    protected function parseDatetime(EventDateTime $googleDatetime): Carbon
+    protected function parseDatetime(?EventDateTime $googleDatetime): ?Carbon
     {
-        return Carbon::parse($googleDatetime->dateTime ?? $googleDatetime->date)->utc();
+        return $googleDatetime ? Carbon::parse($googleDatetime->dateTime ?? $googleDatetime->date)->utc() : null;
     }
 
     /**
