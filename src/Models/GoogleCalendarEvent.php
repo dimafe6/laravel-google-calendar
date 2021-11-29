@@ -56,6 +56,8 @@ class GoogleCalendarEvent extends Model
 
     protected $dates = ['date_start', 'date_end'];
 
+    protected $casts = ['recurrence' => 'array'];
+
     /**
      * @return BelongsTo
      * @author Dmytro Feshchenko <dimafe2000@gmail.com>
