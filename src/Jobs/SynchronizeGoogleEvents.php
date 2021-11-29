@@ -90,7 +90,8 @@ class SynchronizeGoogleEvents extends SynchronizeGoogleResource implements Shoul
                     'date_end'           => $this->parseDatetime($event->end),
                     'all_day'            => $this->isAllDayEvent($event),
                     'duration'           => $this->getDuration($event),
-                    'recurrence'         => $event->recurrence
+                    'recurrence'         => $event->recurrence,
+                    'recurring_event_id' => $event->recurringEventId
                 ]);
         }
     }

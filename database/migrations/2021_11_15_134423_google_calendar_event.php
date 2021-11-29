@@ -28,6 +28,7 @@ class GoogleCalendarEvent extends Migration
             $table->integer('duration');
             $table->boolean('all_day')->default(false);
             $table->json('recurrence')->nullable();
+            $table->text('recurring_event_id')->nullable();
 
             $table->foreign('google_calendar_id')
                 ->references('id')->on('google_calendars')

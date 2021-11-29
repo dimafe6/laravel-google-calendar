@@ -27,6 +27,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @property integer $duration
  * @property boolean $all_day
  * @property string $recurrence
+ * @property string $recurring_event_id
  * @property GoogleCalendar $calendar
  */
 class GoogleCalendarEvent extends Model
@@ -52,6 +53,7 @@ class GoogleCalendarEvent extends Model
         'duration',
         'all_day',
         'recurrence',
+        'recurring_event_id',
     ];
 
     protected $dates = ['date_start', 'date_end'];
